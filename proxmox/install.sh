@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
   exit
 fi
 
@@ -9,7 +9,7 @@ USER_HOME_DIR="/home/$(who am i | awk '{print $1}')"
 DOWNLOADS_DIR="$USER_HOME_DIR/Downloads"
 
 # Fish
-cp fish/config.fish ~/.config/fish/config.fish
+cp fish/config.fish "$USER_HOME_DIR"/.config/fish/config.fish
 
 apt update
 apt -y upgrade
@@ -30,6 +30,10 @@ cd /opt/nvim-linux-x86_64
 ln -s /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
 cp /opt/nvim-linux-x86_64/share/man/man1/nvim.1 /usr/share/man/man1
 mandb
+cd -
+
+# neovim config
+cp -rf nvim "$USER_HOME_DIR"/.config/
 
 # lnav
 echo "Installing lnav..."
