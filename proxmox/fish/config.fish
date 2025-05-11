@@ -1,3 +1,8 @@
+if status is-interactive
+    # Commands to run in interactive sessions can go here
+    oh-my-posh init fish --config ~/.cache/oh-my-posh/themes/bubbles.omp.json | source
+end
+
 # Aliases
 alias ls lsd
 alias ll "lsd -alhtr"
