@@ -1,2 +1,2 @@
 # HomeLab
-All Homelab settings configs in one place
+All Homelab configs in one place
