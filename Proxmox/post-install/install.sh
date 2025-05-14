@@ -59,7 +59,7 @@ ln -s /opt/lazygit /usr/local/bin/lazygit
 
 # Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-source "$HOME/.cargo/env.fish"
+. "$HOME/.cargo/env"
 
 # Rust CLI Tools
 cargo install zoxide
@@ -71,3 +71,6 @@ rm -f /opt/*.md /opt/LICENSE
 git clone https://github.com/vinceliuice/Elegant-grub2-themes.git "$DOWNLOADS_DIR/Elegant-grub2-themes"
 cd "$DOWNLOADS_DIR/Elegant-grub2-themes"
 ./install.sh -t mojave -p float
+
+echo ""
+echo ">>>>> Installation completed!!"
