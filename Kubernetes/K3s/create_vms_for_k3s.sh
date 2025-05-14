@@ -25,7 +25,7 @@ GATEWAY=""
 NUM_MASTER=""
 NUM_WORKER=""
 VM_ID_START=""
-TEMPLATE_ID=9001
+TEMPLATE_ID=9000
 
 # Parse command-line options
 while getopts "s:g:m:w:i:t:h" opt; do
@@ -47,10 +47,23 @@ if [[ -z "$START_IP" || -z "$GATEWAY" || -z "$NUM_MASTER" || -z "$NUM_WORKER" ||
   usage
 fi
 
-if qm list | grep -w "$TEMPLATE_ID" >/dev/null; then
-  echo "VM Template (id "$TEMPLATE_ID") already exists! Pls delete this template or modify the script to create a template with new ID before proceeding"
+if ! qm list | grep -w "$TEMPLATE_ID" >/dev/null; then
+  echo "VM Template (id "$TEMPLATE_ID") not found!! Cannot create VMs"
   exit 1
 fi
+
+# Copy clout-init config file to proxmox snippets path
+PROXMOX_SNIPPETS_LOCATION="/var/lib/vz/snippets"
+CONFIG_FILE="ubuntu-cloud-init-docker.yaml"
+if [ ! -f "$PROXMOX_SNIPPETS_LOCATION"/"$CONFIG_FILE" ]; then
+  echo "ERROR: ${PROXMOX_SNIPPETS_LOCATION}/${CONFIG_FILE} not found"
+  exit 1
+fi
+if ! grep -q "HOSTNAME" "$PROXMOX_SNIPPETS_LOCATION"/"$CONFIG_FILE"; then
+  echo "Invalid config file. Did not find string 'HOSTNAME' in '${PROXMOX_SNIPPETS_LOCATION}/${CONFIG_FILE}'"
+  exit 1
+fi
+cp -f "$PROXMOX_SNIPPETS_LOCATION"/"$CONFIG_FILE" .
 
 # Convert IP to numeric for incrementing
 IFS='.' read -r IP1 IP2 IP3 IP4 <<<"$START_IP"
@@ -91,8 +104,13 @@ for ((i = 0; i < TOTAL_NODES; i++)); do
 
   # add additional compute to worker nodes
   if [ "$i" -ge "$NUM_MASTER" ]; then
-    echo "  - Setting worker nodes to have 2 sockets and 2 cores"
-    qm set $VM_ID --sockets 2 --cores 2
+    qm set $VM_ID --sockets 2 --cores 2 >/dev/null
+    if [ $? -eq 0 ]; then
+      echo "  - Successfully set worker nodes to have 2 sockets and 2 cores"
+    else
+      echo "  >>> configuring core count unsuccessfull!"
+      exit 1
+    fi
   fi
   qm set $VM_ID --ipconfig0 "ip=$IP/24,gw=$GATEWAY" >/dev/null
   if [ $? -eq 0 ]; then
@@ -102,7 +120,24 @@ for ((i = 0; i < TOTAL_NODES; i++)); do
     exit 1
   fi
 
+  NEW_CONFIG_FILE="ubuntu-ci-d-${VM_NAME}.yaml"
+  cp -f "$CONFIG_FILE" "$NEW_CONFIG_FILE"
+  echo "  - Adding HOSTNAME '${VM_NAME}' to '${NEW_CONFIG_FILE}'"
+  sed -i "s/HOSTNAME/${VM_NAME}/g" "$NEW_CONFIG_FILE"
+  echo "  - Moving file '${NEW_CONFIG_FILE}' to '${PROXMOX_SNIPPETS_LOCATION}'"
+  mv "$NEW_CONFIG_FILE" "$PROXMOX_SNIPPETS_LOCATION"
+
+  qm set "$VM_ID" --cicustom "user=local:snippets/${NEW_CONFIG_FILE}" >/dev/null
+  if [ $? -eq 0 ]; then
+    echo "  - Successfully set cloud-init config file '${PROXMOX_SNIPPETS_LOCATION}/${NEW_CONFIG_FILE}' for VM '${VM_ID}'"
+  else
+    echo "  >>> Configuring cloud init config file unsuccessfull!"
+    exit 1
+  fi
+
   echo "  - VM '$VM_ID' created successfully!"
 
   ((CURRENT_IP++)) # Increment IP
 done
+
+rm -f "$CONFIG_FILE"

@@ -1,5 +1,26 @@
 #cloud-config
 
+# Basic system setup
+hostname: HOSTNAME
+fqdn: HOSTNAME.example.com
+
+# User setup configuration
+users:
+  - name: USERNAME
+    gecos: K3s User
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    homedir: /home/USERNAME
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - SSH_KEY
+
+# Change passwords for exampleuser using chpasswd
+chpasswd:
+  expire: false
+  users:
+  - {name: USERNAME, password: PASSWORD, type: text}
+
 package_update: true
 package_upgrade: true
 

@@ -8,7 +8,6 @@ fi
 # ---------------------------------
 USERNAME=""
 PASSWORD=""
-DOCKER_ENABLE="false"
 CLOUD_IMG_FILE="/var/lib/vz/template/iso/ubuntu-server-cloudimg-2404.img"
 SSH_KEY="/root/.ssh/ubuntu_cloud_ssh_key"
 TEMPLATE_NAME="ubuntu-ci"
@@ -19,8 +18,7 @@ usage() {
   echo "Usage: $0 -u <username> -p <password> -d <enable-docker-install>"
   echo "Options:"
   echo "  -u  string    (required)                              Username"
-  echo "  -p  string    (required)                              Password"
-  echo "  -d  flag      (sets to true if present) (optional)    Installs Docker commands added to template"
+  echo "  -p  string    (required)                              Password (IMP: Must be given in single Quotes)"
   echo "  -h  Show help"
   exit 1
 }
@@ -35,17 +33,10 @@ while getopts "u:p:dh" opt; do
   case $opt in
   u) USERNAME="$OPTARG" ;;
   p) PASSWORD="$OPTARG" ;;
-  d) DOCKER_ENABLE="true" ;; # Set to true if flag is present
   h) usage ;;
   *) usage ;;
   esac
 done
-
-# The template that will have docker installation scripts is given a different name and ID
-if [ "$DOCKER_ENABLE" == "true" ]; then
-  TEMPLATE_NAME="$TEMPLATE_NAME"-docker
-  VM_ID=$(($VM_ID + 1))
-fi
 
 if qm list | grep -w "$VM_ID" >/dev/null; then
   echo "VM Template (id "$VM_ID") already exists! Pls delete this template or modify the script to create a template with new ID before proceeding"
@@ -88,6 +79,19 @@ else
   echo "• SSH key found => '${SSH_KEY}'"
 fi
 
+echo "• Modifying cloud-init conf file..."
+# create copy
+cp ubuntu-cloud-init-docker.yaml ubuntu-cloud-init-docker.yaml.bak
+
+echo "  - Adding USERNAME '${USERNAME}'"
+sed -i 's/USERNAME/'$USERNAME'/g' ubuntu-cloud-init-docker.yaml
+
+echo "  - Adding PASSWORD '${PASSWORD}'"
+sed -i 's/PASSWORD/'$PASSWORD'/g' ubuntu-cloud-init-docker.yaml
+
+echo "  - Adding SSH_KEY '${SSH_KEY}.pub'"
+sed -i "s/SSH_KEY/$(cat "$SSH_KEY".pub)/g" ubuntu-cloud-init-docker.yaml
+
 # Copy clout-init config file to proxmox snippets path
 if [ ! -f "/var/lib/vz/snippets/ubuntu-cloud-init-docker.yaml" ]; then
   if [ ! -d "/var/lib/vz/snippets" ]; then
@@ -101,6 +105,8 @@ else
   echo "  - Replacing if changes are noticed."
   cp -f ./ubuntu-cloud-init-docker.yaml /var/lib/vz/snippets/
 fi
+# Revert back
+mv ubuntu-cloud-init-docker.yaml.bak ubuntu-cloud-init-docker.yaml
 
 echo "• Creating VM Template..."
 
@@ -118,11 +124,6 @@ qm set "$VM_ID" --serial0 socket --vga serial0
 qm set "$VM_ID" --ipconfig0 ip=dhcp
 qm set "$VM_ID" --ciuser "$USERNAME" --cipassword "$PASSWORD"
 qm set "$VM_ID" --sshkey "$SSH_KEY".pub
-
-if [ "$DOCKER_ENABLE" == "true" ]; then
-  echo "Setting cloud-init config file 'ubuntu-cloud-init-docker.yaml' to install docker"
-  qm set "$VM_ID" --cicustom "user=local:snippets/ubuntu-cloud-init-docker.yaml"
-fi
 
 qm template "$VM_ID"
 

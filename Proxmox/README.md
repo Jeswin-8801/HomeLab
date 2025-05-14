@@ -20,5 +20,8 @@ cd vm-template/
 sudo ./ubuntu_ci_template.sh -h
 ```
 
+> [!Important]
+> PASSWORD must be given in single quotes in CLI args
+
 - creates a VM template
 - template consists of docker installation configs provided by `ubuntu-cloud-init-docker.yaml` (if opted). This ensures that the VM created from it has Docker installed.
