@@ -21,7 +21,7 @@ echo -e " \033[33;5m Referenced from => JamesTurland/JimsGarage \033[0m"
 KVVERSION="v0.9.1"
 
 # K3S Version
-k3sVersion="v1.33.0+k3s1"
+k3sVersion="v1.32.4+k3s1"
 
 # Set the IP addresses of the master and work nodes
 master1=192.168.0.51
