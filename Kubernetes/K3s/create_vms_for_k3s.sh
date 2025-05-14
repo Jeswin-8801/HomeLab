@@ -47,6 +47,11 @@ if [[ -z "$START_IP" || -z "$GATEWAY" || -z "$NUM_MASTER" || -z "$NUM_WORKER" ||
   usage
 fi
 
+if qm list | grep -w "$TEMPLATE_ID" >/dev/null; then
+  echo "VM Template (id "$TEMPLATE_ID") already exists! Pls delete this template or modify the script to create a template with new ID before proceeding"
+  exit 1
+fi
+
 # Convert IP to numeric for incrementing
 IFS='.' read -r IP1 IP2 IP3 IP4 <<<"$START_IP"
 CURRENT_IP=$IP4 # Start IP increment from last octet
