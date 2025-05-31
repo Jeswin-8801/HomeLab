@@ -14,7 +14,7 @@ usage() {
   echo "  -m  Number of master nodes                                    (required)"
   echo "  -w  Number of worker nodes                                    (required)"
   echo "  -i  VM ID start (first VM ID)                                 (required)"
-  echo "  -t  Template VM ID (source VM to clone)                       (optional, 9001 by default)"
+  echo "  -t  Template VM ID (source VM to clone)                       (optional, 9000 by default)"
   echo "  -h  Show help"
   exit 1
 }

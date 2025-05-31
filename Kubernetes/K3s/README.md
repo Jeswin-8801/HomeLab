@@ -39,3 +39,10 @@ update VM 105: -cores 2 -sockets 2
 ```bash
 sudo ./create_vms_for_k3s.sh -h
 ```
+
+# K3s Nodes Spin Up
+
+> Run the script below after modifying the necessary parameters in the first section of the script:
+> ```bash
+> sudo ./k3s.sh
+> ```
