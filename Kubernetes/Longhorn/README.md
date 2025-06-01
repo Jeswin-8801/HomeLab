@@ -22,3 +22,6 @@ sudo ./create_vms_for_longhorn.sh -h
 > ```bash
 > sudo ./longhorn-K3S.sh
 > ```
+
+- The file `longhorn.yaml` is the manifest file used.
+- To access the UI, we create an ingress using the file `longhorn-ingress.yml`. (refer: [longhorn-deploy:ingress](https://longhorn.io/docs/1.9.0/deploy/accessing-the-ui/longhorn-ingress/))
