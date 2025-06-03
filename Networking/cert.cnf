@@ -1,0 +1,26 @@
+# Country Name (C)
+# Organization Name (O)
+# Common Name (CN) - Set this to your server’s hostname or IP address.
+
+# SAN (Subject Alternative Name), [alt-names] is required
+# You can add as many hostname and IP entries as you wish
+
+[req]
+default_md = sha256
+distinguished_name = req_distinguished_name
+req_extensions = v3_ext
+x509_extensions = v3_ext
+prompt = no
+
+[req_distinguished_name]
+C = IN
+O = Homelab Services
+CN = pi-hole.home.local
+
+[v3_ext]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = pi-hole.home.local
+DNS.2 = pi.hole               # Default pihole hostnamee
+IP = 192.168.0.40             # Replace with your Pi-hole IP
