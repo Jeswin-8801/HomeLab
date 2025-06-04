@@ -1,0 +1,10 @@
+ports:
+  websecure:
+    exposedPort: 443
+
+ingressRoute:
+  dashboard:
+    enabled: true
+
+service:
+  type: LoadBalancer
