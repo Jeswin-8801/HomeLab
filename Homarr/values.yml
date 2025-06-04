@@ -1,0 +1,12 @@
+service:
+  enabled: true
+  type: LoadBalancer
+  port: 80
+  targetPort: 7575
+  nameOverride: homarr-lb
+
+persistence:
+  homarrDatabase:
+    enabled: true
+    storageClassName: "longhorn"
+    size: "1Gi"
