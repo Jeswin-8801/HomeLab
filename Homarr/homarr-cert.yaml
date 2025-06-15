@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: homarr-custom-cert
+  namespace: homarr
+spec:
+  secretName: homarr-custom-tls
+  issuerRef:
+    name: spnw-intermediate-ca1-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - homarr.home.local

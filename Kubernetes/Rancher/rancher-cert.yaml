@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rancher-custom-cert
+  namespace: cattle-system
+spec:
+  secretName: rancher-custom-tls
+  issuerRef:
+    name: spnw-intermediate-ca1-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - rancher.home.local

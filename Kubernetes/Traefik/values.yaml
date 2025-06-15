@@ -1,0 +1,28 @@
+globalArguments:
+  - "--global.sendanonymoususage=false"
+  - "--global.checknewversion=false"
+
+additionalArguments:
+  - "--api.dashboard=true"
+  - "--api=true"
+  - "--serversTransport.insecureSkipVerify=true" # for self signed certs
+  - "--log.level=DEBUG"
+
+ports:
+  web:
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+        permanent: true
+  websecure:
+    tls:
+      enabled: true
+
+deployment:
+  enabled: true
+  replicas: 2 # match with number of workers
+
+service:
+  enabled: true
+  type: LoadBalancer

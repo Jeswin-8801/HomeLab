@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-dashboard-custom-cert
+  namespace: traefik
+spec:
+  secretName: traefik-dashboard-custom-tls
+  issuerRef:
+    name: spnw-intermediate-ca1-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - traefik.home.local
