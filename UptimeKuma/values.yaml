@@ -1,0 +1,6 @@
+volume:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 4Gi
+  storageClassName: "longhorn"
+  existingClaim: ""
