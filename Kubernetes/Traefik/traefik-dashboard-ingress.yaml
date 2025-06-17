@@ -11,8 +11,13 @@ spec:
   tls:
       secretName: traefik-dashboard-custom-tls
   routes:
-    - match: Host(`traefik.home.local`)
+    - match: Host(`traefik.home.local`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
       services:
         - name: api@internal
+          kind: TraefikService
+    - match: Host(`traefik.home.local`) && PathPrefix(`/ping`)
+      kind: Rule
+      services:
+        - name: ping@internal
           kind: TraefikService

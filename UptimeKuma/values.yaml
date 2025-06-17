@@ -4,3 +4,17 @@ volume:
   size: 4Gi
   storageClassName: "longhorn"
   existingClaim: ""
+
+podEnv:
+  - name: NODE_EXTRA_CA_CERTS
+    value: /etc/ssl/certs/custom-ca.crt
+
+additionalVolumeMounts:
+  - name: custom-ca-volume
+    mountPath: /etc/ssl/certs/custom-ca.crt
+    subPath: custom-ca.crt
+
+additionalVolumes:
+  - name: custom-ca-volume
+    configMap:
+      name: kuma-custom-ca
