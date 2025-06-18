@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pgadmin-custom-cert
+  namespace: postgres
+spec:
+  secretName: pgadmin-custom-tls
+  issuerRef:
+    name: spnw-intermediate-ca1-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - pgadmin4.home.local

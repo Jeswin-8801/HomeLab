@@ -79,7 +79,14 @@ kubectl get pods \
   --namespace longhorn-system \
   --watch
 
-# Step 3: Print out confirmation
+# Step 3: Install nfs-common for each node
+for newnode in "${storage[@]}"; do
+  ssh $user@$master1 -i ~/.ssh/$certName <<-EOF
+    sudo apt install -y nfs-common
+  EOF
+done
+
+# Step 4: Print out confirmation
 
 kubectl get nodes
 kubectl get svc -n longhorn-system

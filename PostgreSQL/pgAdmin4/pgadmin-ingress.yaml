@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pgadmin-ingress
+  namespace: postgres
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: pgadmin-custom-tls
+  routes:
+    - match: Host(`pgadmin4.home.local`)
+      kind: Rule
+      services:
+        - name: pgadmin4
+          port: 80

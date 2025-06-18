@@ -1,0 +1,32 @@
+serverDefinitions:
+  enabled: true
+  resourceType: ConfigMap
+  useStringData: true  # easier for debugging and direct YAML entry
+  servers:
+    postgres-db:
+      Name: "PostgreSQL Main"
+      Group: "Databases"
+      Host: "postgres-service.postgres.svc.cluster.local"  # <service-name>.<namespace>.svc.cluster.local
+      Port: "5432"
+      MaintenanceDB: "postgres"                            # Connect to the postgres database after logging in — and use that session to browse and manage other databases
+      Username: <USERNAME>
+      SSLMode: "prefer"                                    # or "require" if using TLS
+
+preferences:
+  enabled: true
+  data:
+    misc:user_interface:theme: "dark"
+
+env:
+  email: <EMAIL>                                           # Note: non global emails fail to build
+  password: <SECURE_PASSWORD>
+  variables:
+    - name: PGADMIN_CONFIG_GLOBALLY_DELIVERABLE
+      value: "False"
+
+persistentVolume:
+  enabled: true
+  storageClass: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 2Gi
