@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: zitadel-ingress
+  namespace: zitadel
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: zitadel-custom-tls
+  routes:
+    - match: Host(`zitadel.home.local`)
+      kind: Rule
+      services:
+        - name: my-zitadel
+          port: 8080

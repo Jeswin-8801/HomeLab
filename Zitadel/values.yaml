@@ -1,0 +1,55 @@
+replicaCount: 1
+
+zitadel:
+  masterkeySecretName: zitadel-masterkey       # used to encrypt/decrypt all internal secrets in Zitadel’s database (such as user credentials, tokens, OTP configs, etc.).
+  configmapConfig:
+    ExternalSecure: true
+    ExternalDomain: zitadel.home.local
+    TLS:
+      Enabled: false                           # Zitadel itself does not serve TLS; We let traefik handle it
+    Database:
+      Postgres:
+        Host: "postgres-service.postgres.svc.cluster.local"
+        Port: 5432
+        Database: zitadel
+        MaxOpenConns: 20
+        MaxIdleConns: 10
+        MaxConnLifetime: 30m
+        MaxConnIdleTime: 5m
+        User:
+          Username: zitadel
+          SSL:
+            Mode: disable
+        Admin:
+          Username: admin
+          SSL:
+            Mode: disable
+    FirstInstance:
+      Org:
+        Name: Homelab
+        Human:
+          Username: 'admin'
+          FirstName: 'Jeswin'
+          LastName: 'Santosh'
+          DisplayName: 'Admin'
+          Email:
+            Address: 'admin@example.com'
+            Verified: true                # Bypasses email verification, as we would need to setup SMTP for it to work
+          Password: '<INITIAL_PASSWORD>'  # Will be used to login initially; Will be asked to change!
+  secretConfig:
+    Database:
+      Postgres:
+        User:
+          Password: '<ZITADEL_USER_PASSWORD>'
+        Admin:
+          Password: '<POSTGRES_ADMIN_PASSWORD>'
+
+extraVolumes:
+  - name: zitadel-data
+    persistentVolumeClaim:
+      claimName: zitadel-data
+
+extraVolumeMounts:
+  - name: zitadel-data
+    mountPath: /var/lib/zitadel
+    readOnly: false
