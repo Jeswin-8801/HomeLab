@@ -1,0 +1,40 @@
+env:
+  TZ: "India/Kolkata"
+  AUTH_PROVIDERS: "oidc,credentials"
+  # -- URL to redirect to after clicking logging out.
+  AUTH_LOGOUT_REDIRECT_URL: "https://zitadel.home.local/oidc/v1/end_session"
+  # -- Issuer URI of OIDC provider without trailing slash (/)
+  AUTH_OIDC_ISSUER: "https://zitadel.home.local"
+  # -- Display name of provider (in login screen); Cosmetic Only
+  AUTH_OIDC_CLIENT_NAME: "OIDC"
+  AUTH_OIDC_SCOPE_OVERWRITE: "openid email profile"
+  # -- Attribute used for groups (roles) claim
+  AUTH_OIDC_GROUPS_ATTRIBUTE: "default"
+  NODE_EXTRA_CA_CERTS: "/appdata/trusted-certificates/tls.crt"      # Location of the root ca cert as described below in `homarrTrustedCerts`
+
+envSecrets:
+  authOidcCredentials:
+    existingSecret: "auth-oidc-secret"        # Name of Kubernetes Secret object
+    oidcClientId: "oidc-client-id"            # Key in the secret holding the client ID
+    oidcClientSecret: "oidc-client-secret"    # Key in the secret holding the client secret
+
+hostAliases:
+  - ip: "192.168.0.63"                        # Add this if you are facing any DNS resolve issues
+    hostnames:
+      - "zitadel.home.local"
+      - "traefik.home.local"
+      - "proxmox.home.local"
+      - "uptime-kuma.home.local"
+      - "rancher.home.local"
+      - "pgadmin4.home.local"
+      - "pi-hole.home.local"
+
+persistence:
+  homarrDatabase:
+    enabled: true
+    storageClassName: "longhorn"
+    size: "1Gi"
+  homarrTrustedCerts:
+    enabled: true
+    type: secret                              # IMP
+    existingSecret: "my-root-ca-secret"
