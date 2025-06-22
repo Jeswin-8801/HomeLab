@@ -36,5 +36,7 @@ persistence:
     size: "1Gi"
   homarrTrustedCerts:
     enabled: true
-    type: secret                              # IMP
-    existingSecret: "my-root-ca-secret"
+    type: existingSecret                      # IMP
+    existingSecretName: "my-root-ca-secret"
+    existingSecretKeys:
+      - tls.crt`
