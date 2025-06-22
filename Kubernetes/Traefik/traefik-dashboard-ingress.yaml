@@ -3,8 +3,6 @@ kind: IngressRoute
 metadata:
   name: traefik-dashboard
   namespace: traefik
-  annotations:
-    kubernetes.io/ingress.class: traefik
 spec:
   entryPoints:
     - websecure
@@ -16,6 +14,9 @@ spec:
       services:
         - name: api@internal
           kind: TraefikService
+      middlewares:
+        - name: tinyauth-forwardauth
+          namespace: traefik
     - match: Host(`traefik.home.local`) && PathPrefix(`/ping`)
       kind: Rule
       services:
