@@ -15,11 +15,19 @@ spec:
       labels:
         app: tinyauth
     spec:
+      volumes:
+        - name: root-ca
+          secret:
+            secretName: my-root-ca-secret
       containers:
         - name: tinyauth
           image: ghcr.io/steveiliop56/tinyauth:v3
           ports:
             - containerPort: 3000
+          volumeMounts:
+            - name: root-ca
+              mountPath: /etc/ssl/certs/my-root-ca.crt
+              subPath: my-root-ca.crt
           env:
             - name: SECRET
               valueFrom:
@@ -36,6 +44,8 @@ spec:
                 secretKeyRef:
                   name: tinyauth-secret
                   key: clientSecret
+            - name: NODE_EXTRA_CA_CERTS
+              value: /etc/ssl/certs/my-root-ca.crt
           envFrom:
             - configMapRef:
                 name: tinyauth-configmap
@@ -47,3 +57,8 @@ spec:
             httpGet:
               path: /api/healthcheck
               port: 3000
+      # Incase you get DNS resolve issues
+      hostAliases:
+        - hostnames:
+          - zitadel.home.local
+          ip: 192.168.0.63

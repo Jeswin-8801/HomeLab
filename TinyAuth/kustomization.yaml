@@ -1,6 +1,7 @@
 resources:
   - namespace.yaml
   - secrets.yaml
+  - root-ca-secret.yaml
   - configmap.yaml
   - deployment.yaml
   - service.yaml

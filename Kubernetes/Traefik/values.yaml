@@ -19,6 +19,11 @@ ports:
     tls:
       enabled: true
 
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+
 deployment:
   enabled: true
   replicas: 2 # match with number of workers
