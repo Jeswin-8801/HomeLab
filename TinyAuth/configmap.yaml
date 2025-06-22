@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tinyauth-configmap
+  namespace: tinyauth
+data:
+  APP_URL: "https://tinyauth.home.local"
+  GENERIC_SCOPES: "openid profile email preferred_username groups"
+  GENERIC_AUTH_URL: "https://zitadel.home.local/oauth/v2/authorize"
+  GENERIC_TOKEN_URL: "https://zitadel.home.local/oauth/v2/token"
+  GENERIC_USER_URL: "https://zitadel.home.local/oidc/v1/userinfo"
+  GENERIC_NAME: "OIDC"
+  OAUTH_AUTO_REDIRECT: "generic"        # must be one of (none,github,google,generic)
+  DISABLE_CONTINUE: "true"

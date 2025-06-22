@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-tinyauth
+  namespace: tinyauth
+  labels:
+    app: tinyauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tinyauth
+  template:
+    metadata:
+      labels:
+        app: tinyauth
+    spec:
+      containers:
+        - name: tinyauth
+          image: ghcr.io/steveiliop56/tinyauth:v3
+          ports:
+            - containerPort: 3000
+          env:
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-secret
+                  key: secretKey
+            - name: GENERIC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-secret
+                  key: clientID
+            - name: GENERIC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tinyauth-secret
+                  key: clientSecret
+          envFrom:
+            - configMapRef:
+                name: tinyauth-configmap
+          livenessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: 3000
+          readinessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: 3000
