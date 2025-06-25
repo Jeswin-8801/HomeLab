@@ -1,0 +1,5 @@
+additionalTrustedCAs: true
+
+hostname: rancher.home.local
+
+replicas: 1
