@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: checkmk-ingress-route
+  namespace: checkmk
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: checkmk-tls
+  routes:
+    - match: Host(`checkmk.home.local`)
+      kind: Rule
+      services:
+        - name: checkmk-service
+          port: 5000

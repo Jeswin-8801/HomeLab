@@ -1,0 +1,9 @@
+resources:
+  - namespace.yaml
+  - secrets.yaml
+  - root-ca-secret.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - cert.yaml
+  - ingress-route.yaml

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-checkmk
+  namespace: checkmk
+  labels:
+    app: checkmk
+spec:
+  replicas: 1       # NOTE: must be 1; not designed for horizontal scaling
+  selector:
+    matchLabels:
+      app: checkmk
+  template:
+    metadata:
+      labels:
+        app: checkmk
+    spec:
+      initContainers:
+        - name: install-ca
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              apk add --no-cache ca-certificates && \
+              mkdir -p /usr/local/share/ca-certificates/custom && \
+              cp /custom-ca/my-root-ca.crt /usr/local/share/ca-certificates/custom/ && \
+              update-ca-certificates && \
+              cp -r /etc/ssl/certs/* /ca-bundle/
+          volumeMounts:
+            - name: custom-ca
+              mountPath: /custom-ca
+            - name: ca-bundle
+              mountPath: /ca-bundle
+      containers:
+        - name: checkmk
+          image: checkmk/check-mk-raw:2.3.0-2025.06.27
+          ports:
+            - containerPort: 5000
+              name: web
+              protocol: TCP
+            - containerPort: 8000
+              name: redirect
+              protocol: TCP
+            - containerPort: 162
+              name: snmptrap
+              protocol: UDP
+          env:
+            - name: TZ
+              value: "India/Kolkata"
+            - name: CMK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: checkmk-secret
+                  key: CMK_PASSWORD
+          volumeMounts:
+            - name: checkmk-data
+              mountPath: /omd/sites
+            - name: tmpfs-volume
+              mountPath: /opt/omd/sites/cmk/tmp
+            - name: ca-bundle
+              mountPath: /etc/ssl/certs
+      volumes:
+        - name: checkmk-data
+          persistentVolumeClaim:
+            claimName: checkmk-pvc
+        - name: tmpfs-volume
+          emptyDir:
+            medium: Memory
+        - name: custom-ca
+          secret:
+            secretName: my-root-ca-secret
+        - name: ca-bundle
+          emptyDir: {}
