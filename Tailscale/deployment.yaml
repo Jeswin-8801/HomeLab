@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tailscale-subnet-router
+  namespace: tailscale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tailscale
+  template:
+    metadata:
+      labels:
+        app: tailscale
+    spec:
+      hostNetwork: true
+      containers:
+        - name: tailscale
+          image: tailscale/tailscale:latest
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN", "SYS_MODULE"]
+            privileged: true
+          env:
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-secret
+                  key: TS_AUTHKEY
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              tailscaled --tun=userspace-networking &
+              sleep 5
+              tailscale up \
+                --authkey=${TS_AUTHKEY} \
+                --advertise-routes=192.168.0.0/24 \
+                --accept-routes \
+                --hostname=homelab-tailscale
+              sleep infinity
+          volumeMounts:
+            - name: state
+              mountPath: /var/lib/tailscale
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
+      volumes:
+        - name: state
+          emptyDir: {}
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+
