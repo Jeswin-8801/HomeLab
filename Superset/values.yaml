@@ -1,0 +1,99 @@
+supersetNode:
+  replicas:
+    enabled: true
+    replicaCount: 1
+  connections:
+    db_host: "postgres-service.postgres.svc.cluster.local"
+    db_port: "5432"
+    db_user: "<POSTGRES_DB_USERNAME>"
+    db_pass: "<POSTGRES_DB_PASSWORD>"
+    db_name: superset   # This DB must exist in Postgres (Create it if it does not exist)
+
+postgresql:
+  enabled: false
+
+extraVolumes:
+  - name: custom-ca-secret
+    secret:
+      secretName: my-root-ca-secret
+      defaultMode: 0400
+
+extraVolumeMounts:
+  - name: custom-ca-secret
+    mountPath: /etc/ssl/certs/custom
+    readOnly: true
+
+# Optional: force Python requests to use updated bundle
+extraEnv:
+  REQUESTS_CA_BUNDLE: /etc/ssl/certs/custom/my-root-ca.crt
+
+bootstrapScript: |
+  #!/bin/bash
+
+  # Install necessary Python packages
+  pip install psycopg2-binary clickhouse-connect
+  pip install authlib
+
+  # Optional: install other packages
+  # pip install pymysql mysqlclient
+
+  # Add custom CA to system trust store
+  cp /etc/ssl/certs/custom/my-root-ca.crt /usr/local/share/ca-certificates/my-root-ca.crt
+  update-ca-certificates
+
+  # Track that bootstrap ran
+  if [ ! -f ~/bootstrap ]; then
+    echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap
+  fi
+
+extraEnvRaw:
+  - name: SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: superset-secrets
+        key: secretKey
+  - name: CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: superset-secrets
+        key: clientId
+  - name: CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: superset-secrets
+        key: clientSecret
+
+configOverrides:
+  enable_oauth: |
+    from flask_appbuilder.security.manager import AUTH_OAUTH
+
+    AUTH_TYPE = AUTH_OAUTH
+    OAUTH_PROVIDERS = [
+        {
+            "name": "oidc",
+            "icon": "fa-key",
+            "token_key": "access_token",
+            "remote_app": {
+                "client_id": os.environ.get('CLIENT_ID'),
+                "client_secret": os.environ.get("CLIENT_SECRET"),
+                'server_metadata_url': 'https://zitadel.home.local/.well-known/openid-configuration',
+                "client_kwargs": {
+                    "scope": "openid email profile"
+                },
+                "access_token_params": None,
+                "refresh_token_params": None,
+                "redirect_uri": 'https://superset.home.local/oauth-authorized/oidc',
+                "response_type": 'code'
+            }
+        }
+    ]
+    # Map Authlib roles to superset roles
+    AUTH_ROLE_ADMIN = 'admin'
+    AUTH_ROLE_PUBLIC = 'Gamma'
+    # Will allow user self registration, allowing to create Flask users from Authorized User
+    AUTH_USER_REGISTRATION = True
+    # The default user self registration role
+    AUTH_USER_REGISTRATION_ROLE = "Gamma"
+  secret: |
+    # Generate your own secret key for encryption. Use `openssl rand -base64 42` to generate a good key
+    SECRET_KEY = os.environ.get("SECRET_KEY", "fallback_secret_key")
