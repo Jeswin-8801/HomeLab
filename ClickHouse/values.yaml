@@ -1,0 +1,25 @@
+replicaCount: 1
+
+auth:
+  username: admin
+  existingSecret: clickhouse-secret
+  existingSecretKey: clickhouse-admin-password
+
+keeper:
+  enabled: false
+
+zookeeper:
+  enabled: false
+
+persistence:
+  enabled: true
+  volumeName: clickhouse-data
+  storageClass: "longhorn"
+  size: 4Gi
+
+# service:
+#   type: LoadBalancer
+#   ports:
+#     http: 8123
+#     tcp: 9000
+
