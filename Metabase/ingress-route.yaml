@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metabase-ingress-route
+  namespace: metabase
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: metabase-tls
+  routes:
+    - match: Host(`metabase.home.local`)
+      kind: Rule
+      services:
+        - name: metabase-service
+          port: 3000

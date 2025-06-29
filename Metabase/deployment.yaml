@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-metabase
+  namespace: metabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metabase
+  template:
+    metadata:
+      labels:
+        app: metabase
+    spec:
+      containers:
+        - name: metabase
+          image: metabase/metabase:latest
+          ports:
+            - containerPort: 3000
+          env:
+            # From ConfigMap
+            - name: MB_DB_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: metabase-config
+                  key: MB_DB_TYPE
+            - name: MB_DB_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: metabase-config
+                  key: MB_DB_DBNAME
+            - name: MB_DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: metabase-config
+                  key: MB_DB_PORT
+            - name: MB_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: metabase-config
+                  key: MB_DB_HOST
+            - name: JAVA_TIMEZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: metabase-config
+                  key: JAVA_TIMEZONE
+            # From Secret
+            - name: MB_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: metabase-secrets
+                  key: MB_DB_USER
+            - name: MB_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: metabase-secrets
+                  key: MB_DB_PASS
+

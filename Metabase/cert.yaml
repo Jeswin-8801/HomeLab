@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: metabase-cert
+  namespace: metabase
+spec:
+  secretName: metabase-tls
+  issuerRef:
+    name: spnw-intermediate-ca1-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - metabase.home.local
